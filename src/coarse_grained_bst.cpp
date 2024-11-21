@@ -28,15 +28,16 @@ auto CoarseGrainedBST::Search(uint32_t key) -> bool
         return false;
 
     Node *node = root;
-    while (node != nullptr)
+    while ((node->left != nullptr) && (node->right != nullptr))
     {
-        if (key == node->key)
-            return true;
-        else if (key < node->key)
+        if (key < node->key)
             node = node->left;
-        else if (key > node->key)
+        else
             node = node->right;
     }
+
+    if (key == node->key)
+        return true;
 
     return false;
 }
@@ -64,12 +65,11 @@ auto CoarseGrainedBST::Insert(uint32_t key) -> bool
 
             Node *newInternal;
             auto newLeaf = new Node(key);
-            auto dupNode = new Node(node->key);
 
             if (key < node->key)
-                newInternal = new Node(node->key, newLeaf, dupNode);
+                newInternal = new Node(node->key, newLeaf, node);
             else
-                newInternal = new Node(key, dupNode, newLeaf);
+                newInternal = new Node(key, node, newLeaf);
 
             // replace current leaf with the new internal node
             if (parent != nullptr)
@@ -84,7 +84,7 @@ auto CoarseGrainedBST::Insert(uint32_t key) -> bool
                 root = newInternal;
             }
 
-            delete node;
+            // delete node;
             return true;
         }
 
@@ -95,15 +95,19 @@ auto CoarseGrainedBST::Insert(uint32_t key) -> bool
         else
             node = node->right;
     }
+
+    // should never reach here
+    return false;
 }
 
 auto CoarseGrainedBST::Delete(uint32_t key) -> bool
 {
     std::scoped_lock lock(op_lock);
 
-    if (root = nullptr)
+    if (root == nullptr)
         return false;
 
+    Node *grandparent = nullptr;
     Node *parent = nullptr;
     Node *node = root;
     while (node != nullptr)
@@ -115,17 +119,36 @@ auto CoarseGrainedBST::Delete(uint32_t key) -> bool
             {
                 if (parent != nullptr)
                 {
-                    if (parent->left == node)
-                        parent->left = nullptr;
-                    else
-                        parent->right = nullptr;
-
-                    // delete parent if it becomes a leaf node
-                    if ((parent->left == nullptr) && (parent->right == nullptr))
+                    if (key < parent->key)
                     {
-                        delete parent;
-                        parent = nullptr;
+                        if (grandparent != nullptr)
+                        {
+                            if (grandparent->left == parent)
+                                grandparent->left = parent->right;
+                            else
+                                grandparent->right = parent->right;
+                        }
+                        else
+                        {
+                            root = parent->right;
+                        }
                     }
+                    else
+                    {
+                        if (grandparent != nullptr)
+                        {
+                            if (grandparent->left == parent)
+                                grandparent->left = parent->left;
+                            else
+                                grandparent->right = parent->left;
+                        }
+                        else
+                        {
+                            root = parent->left;
+                        }
+                    }
+
+                    delete parent;
                 }
                 else
                 {
@@ -142,6 +165,8 @@ auto CoarseGrainedBST::Delete(uint32_t key) -> bool
             }
         }
 
+        if (parent != nullptr)
+            grandparent = parent;
         parent = node;
         if (key < node->key)
             node = node->left;
@@ -150,4 +175,9 @@ auto CoarseGrainedBST::Delete(uint32_t key) -> bool
     }
 
     return false;
+}
+
+void CoarseGrainedBST::PrintTree()
+{
+    BinarySearchTree::PrintTree(root);
 }

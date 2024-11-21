@@ -15,8 +15,8 @@ public:
     auto Delete(uint32_t key) -> bool;
 
 private:
-    const uint64_t FLAG_BIT = (1 << 63);
-    const uint64_t TAG_BIT = (1 << 62);
+    const uint64_t FLAG_BIT = (1ULL << 63);
+    const uint64_t TAG_BIT = (1ULL << 62);
     Node *root;
 
     typedef struct

@@ -89,6 +89,8 @@ auto LockFreeBST::Insert(uint32_t key) -> bool
 
 auto LockFreeBST::Delete(uint32_t key) -> bool
 {
+    (void)key;
+    return false;
 }
 
 /*

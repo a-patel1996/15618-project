@@ -14,12 +14,13 @@ public:
     auto Search(uint32_t key) -> bool;
     auto Insert(uint32_t key) -> bool;
     auto Delete(uint32_t key) -> bool;
+    void PrintTree();
 
 private:
     Node *root;
     std::mutex op_lock;
 
-    void CoarseGrainedBST::FreeNode(Node *node);
+    void FreeNode(Node *node);
 };
 
 #endif

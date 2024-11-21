@@ -6,7 +6,7 @@ OBJDIR = obj
 
 # Compiler & flags
 CXX = g++
-CXXFLAGS = -Wall -Werror -Wextra -O3 -std=c++20 -pthread -m64 -I$(INCDIR)
+CXXFLAGS = -g -Wall -Werror -Wextra -O3 -std=c++20 -pthread -m64 -I$(INCDIR)
 
 # Source files
 SRCS = $(wildcard $(SRCDIR)/*.cpp)
@@ -35,20 +35,26 @@ stlf: $(OBJS) $(TESTDIR)/single_threaded/lock-free
 
 # Pattern rules for tests
 $(TESTDIR)/multi_threaded/%: $(TESTDIR)/multi_threaded/%.cpp $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $< -o $@ $(LDFLAGS)
 	@echo "Running $@..."
 	./$@
 
 $(TESTDIR)/single_threaded/%: $(TESTDIR)/single_threaded/%.cpp $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $< -o $@ $(LDFLAGS)
 	@echo "Running $@..."
 	./$@
 
 # Compile source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(wildcard $(INCDIR)/*.h)
 	@mkdir -p $(OBJDIR)
-	$(CC) -c $< -o $@ $(CFLAGS)
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 # Clean up
 clean:
-	rm -rf $(OBJDIR) $(TESTDIR)/multi_threaded/* $(TESTDIR)/single_threaded/* *.o
+	rm -rf $(OBJDIR) 
+	rm -f $(TESTDIR)/multi_threaded/coarse_grained 
+	rm -f $(TESTDIR)/multi_threaded/fine_grained 
+	rm -f $(TESTDIR)/multi_threaded/lock-free
+	rm -f $(TESTDIR)/single_threaded/coarse_grained 
+	rm -f $(TESTDIR)/single_threaded/fine_grained 
+	rm -f $(TESTDIR)/single_threaded/lock-free

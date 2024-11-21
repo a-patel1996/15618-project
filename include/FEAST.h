@@ -2,8 +2,9 @@
 #define __FEAST_H__
 
 #include <stdint.h>
+#include "bst.h"
 
-class LockFreeBST
+class LockFreeBST : public BinarySearchTree
 {
 public:
     LockFreeBST();
@@ -16,17 +17,6 @@ public:
 private:
     const uint64_t FLAG_BIT = (1 << 63);
     const uint64_t TAG_BIT = (1 << 62);
-
-    typedef struct Node
-    {
-        uint32_t key;
-        Node *left;
-        Node *right;
-
-        Node(uint32_t key) : key(key), left(nullptr), right(nullptr) {};
-        Node(uint32_t key, Node *left, Node *right) : key(key), left(left), right(right) {};
-    } Node;
-
     Node *root;
 
     typedef struct

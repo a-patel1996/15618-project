@@ -12,6 +12,11 @@ CXXFLAGS = -Wall -Werror -Wextra -O3 -std=c++20 -pthread -m64 -I$(INCDIR)
 SRCS = $(wildcard $(SRCDIR)/*.cpp)
 OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
 
+# Include bst explicitly
+BASE = $(OBJDIR)/bst.o
+OBJS := $(filter-out $(OBJDIR)/bst.o, $(OBJS)) # Exclude bst.o from the default pattern
+OBJS += $(BASE)
+
 # Targets for test combinations
 .PHONY: all clean multi_threaded single_threaded
 

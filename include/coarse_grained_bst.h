@@ -3,8 +3,9 @@
 
 #include <mutex>
 #include <stdint.h>
+#include "bst.h"
 
-class CoarseGrainedBST
+class CoarseGrainedBST : public BinarySearchTree
 {
 public:
     CoarseGrainedBST();
@@ -15,16 +16,6 @@ public:
     auto Delete(uint32_t key) -> bool;
 
 private:
-    typedef struct Node
-    {
-        uint32_t key;
-        Node *left;
-        Node *right;
-
-        Node(uint32_t key) : key(key), left(nullptr), right(nullptr) {};
-        Node(uint32_t key, Node *left, Node *right) : key(key), left(left), right(right) {};
-    } Node;
-
     Node *root;
     std::mutex op_lock;
 

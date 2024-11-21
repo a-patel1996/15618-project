@@ -22,6 +22,23 @@ void CoarseGrainedBST::FreeNode(Node *node)
 
 auto CoarseGrainedBST::Search(uint32_t key) -> bool
 {
+    std::scoped_lock lock(op_lock);
+
+    if (root == nullptr)
+        return false;
+
+    Node *node = root;
+    while (node != nullptr)
+    {
+        if (key == node->key)
+            return true;
+        else if (key < node->key)
+            node = node->left;
+        else if (key > node->key)
+            node = node->right;
+    }
+
+    return false;
 }
 
 auto CoarseGrainedBST::Insert(uint32_t key) -> bool
@@ -34,17 +51,18 @@ auto CoarseGrainedBST::Insert(uint32_t key) -> bool
         return true;
     }
 
-    Node* node = root;
-    Node* parent = nullptr;
-    while(node != nullptr) {
-        if ((node->left == nullptr) && (node->right == nullptr)) {
+    Node *node = root;
+    Node *parent = nullptr;
+    while (node != nullptr)
+    {
+        if ((node->left == nullptr) && (node->right == nullptr))
+        {
             // node is leaf
-            if (node->key == key)
+            if (key == node->key)
                 // key exists
                 return false;
-            
-            // c
-            Node* newInternal;
+
+            Node *newInternal;
             auto newLeaf = new Node(key);
             auto dupNode = new Node(node->key);
 
@@ -54,16 +72,19 @@ auto CoarseGrainedBST::Insert(uint32_t key) -> bool
                 newInternal = new Node(key, dupNode, newLeaf);
 
             // replace current leaf with the new internal node
-            if (parent != nullptr) {
+            if (parent != nullptr)
+            {
                 if (parent->left == node)
                     parent->left = newInternal;
                 else
                     parent->right = newInternal;
-            } else {
+            }
+            else
+            {
                 root = newInternal;
             }
 
-            // delete node;
+            delete node;
             return true;
         }
 
@@ -74,4 +95,59 @@ auto CoarseGrainedBST::Insert(uint32_t key) -> bool
         else
             node = node->right;
     }
+}
+
+auto CoarseGrainedBST::Delete(uint32_t key) -> bool
+{
+    std::scoped_lock lock(op_lock);
+
+    if (root = nullptr)
+        return false;
+
+    Node *parent = nullptr;
+    Node *node = root;
+    while (node != nullptr)
+    {
+        if ((node->left == nullptr) && (node->right == nullptr))
+        {
+            // reached leaf node
+            if (node->key == key)
+            {
+                if (parent != nullptr)
+                {
+                    if (parent->left == node)
+                        parent->left = nullptr;
+                    else
+                        parent->right = nullptr;
+
+                    // delete parent if it becomes a leaf node
+                    if ((parent->left == nullptr) && (parent->right == nullptr))
+                    {
+                        delete parent;
+                        parent = nullptr;
+                    }
+                }
+                else
+                {
+                    root = nullptr;
+                }
+
+                delete node;
+                return true;
+            }
+            else
+            {
+                // key not found
+                return false;
+            }
+        }
+
+        parent = node;
+        if (key < node->key)
+            node = node->left;
+        else
+            node = node->right;
+    }
+
+    return false;
 }

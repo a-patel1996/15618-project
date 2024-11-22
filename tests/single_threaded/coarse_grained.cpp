@@ -1,10 +1,11 @@
 #include <random>
 #include <vector>
 #include <cassert>
+#include <chrono>
 #include "coarse_grained_bst.h"
 
-#define NUM_KEYS 10000
-#define MAX_KEY_VALUE 1000
+#define NUM_KEYS 1000000
+#define MAX_KEY_VALUE 100000
 
 int main()
 {
@@ -20,6 +21,7 @@ int main()
 
     bool res;
     std::vector<bool> inserted_keys(MAX_KEY_VALUE, false);
+    auto start = std::chrono::high_resolution_clock::now();
     CoarseGrainedBST bst;
     for (auto i = 0; i < NUM_KEYS; i++)
     {
@@ -47,5 +49,8 @@ int main()
         assert(inserted_keys.at(key) == bst.Search(key));
     }
 
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Execution time: " << duration.count() << std::endl;
     return 0;
 }

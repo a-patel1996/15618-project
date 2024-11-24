@@ -89,8 +89,61 @@ auto LockFreeBST::Insert(uint32_t key) -> bool
 
 auto LockFreeBST::Delete(uint32_t key) -> bool
 {
-    (void)key;
-    return false;
+    SeekRecord seekRecord;
+    DeleteMode mode = INJECTION; // start with INJECTION mode
+    while (true)
+    {
+        Seek(key, seekRecord);
+        auto parent = seekRecord.parent;
+        auto addressOfChildField = GetAddressOfNextChildField(key, parent);
+
+        if (mode == INJECTION)
+        {
+            auto terminal = seekRecord.terminal;
+            if (terminal->key != key)
+            {
+                return false;
+            }
+
+            // injection step: try to flag the edge to the leaf node
+            auto result = __sync_bool_compare_and_swap(addressOfChildField, GetAddress(terminal), setFlagged(terminal));
+            if (result)
+            {
+                mode = CLEANUP;
+                auto done = Cleanup(seekRecord);
+                if (done)
+                {
+                    return true;
+                }
+                else
+                {
+                    bool flagged, tagged;
+                    Node *address;
+                    std::tie(flagged, tagged, address) = Read(addressOfChildField);
+                    if ((address == terminal) && (flagged || tagged))
+                    {
+                        Cleanup(seekRecord);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Cleanup mode: Check if the leaf node that was flagged in the INJECTION mode is still present in tree
+            if (seekRecord.terminal != terminal)
+            {
+                return true;
+            }
+            else
+            {
+                auto done = Cleanup(seekRecord);
+                if (done)
+                {
+                    return true;
+                }
+            }
+        }
+    }
 }
 
 /*
@@ -268,6 +321,11 @@ inline auto LockFreeBST::IsTagged(Node *node) -> bool
 inline auto LockFreeBST::IsFlagged(Node *node) -> bool
 {
     return (reinterpret_cast<uint64_t>(node) & FLAG_BIT);
+}
+
+inline auto LockFreeBST::setFlagged(Node *node) -> Node *
+{
+    return reinterpret_cast<Node *>(reinterpret_cast<uint64_t>(node) | FLAG_BIT);
 }
 
 auto LockFreeBST::Read(Node **nodeptr_addr) -> std::tuple<bool, bool, Node *>

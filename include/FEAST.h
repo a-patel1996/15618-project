@@ -27,6 +27,12 @@ private:
         Node *terminal;
     } SeekRecord;
 
+    typedef enum
+    {
+        INJECTION = 0,
+        CLEANUP = 1
+    } DeleteMode;
+
     void Seek(uint32_t key, SeekRecord &seekRecord);
     auto Cleanup(SeekRecord &seekRecord) -> bool;
 
@@ -41,6 +47,7 @@ private:
     auto GetUntagged(Node *node) -> Node *;
     auto IsTagged(Node *node) -> bool;
     auto IsFlagged(Node *node) -> bool;
+    auto setFlagged(Node *node) -> Node *;
     auto Read(Node **nodeptr_addr) -> std::tuple<bool, bool, Node *>;
 };
 #endif

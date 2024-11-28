@@ -129,6 +129,7 @@ auto LockFreeBST::Delete(uint32_t key) -> bool
         }
         else
         {
+            auto terminal = seekRecord.terminal;
             // Cleanup mode: Check if the leaf node that was flagged in the INJECTION mode is still present in tree
             if (seekRecord.terminal != terminal)
             {

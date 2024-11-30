@@ -1,0 +1,66 @@
+#include <random>
+#include <vector>
+#include <cassert>
+#include <chrono>
+#include <thread>
+#include "FEAST.h"
+
+#define NUM_KEYS 100000
+#define MAX_KEY_VALUE 10000
+#define NUM_THREADS 8
+
+void InsertSearchDeleteSearch(LockFreeBST &bst, uint8_t thread_idx)
+{
+    const auto increment = 1;
+
+    for (auto key_ref = (thread_idx * NUM_KEYS); key_ref < ((thread_idx + 1) * NUM_KEYS); key_ref += increment)
+    {
+        for (auto key = key_ref; key < key_ref + increment; key++)
+        {
+            bst.Insert(key);
+        }
+
+        for (auto key = key_ref; key < key_ref + increment; key++)
+        {
+            assert(bst.Search(key) == true);
+        }
+
+        for (auto key = key_ref; key < key_ref + increment; key++)
+        {
+            bst.Delete(key);
+        }
+
+        for (auto key = key_ref; key < key_ref + increment; key++)
+        {
+            assert(bst.Search(key) == false);
+        }
+    }
+}
+
+int main()
+{
+    {
+        std::cout << "CORRECTNESS TEST" << std::endl;
+        std::vector<std::thread> threads;
+        auto start = std::chrono::high_resolution_clock::now();
+        LockFreeBST bst;
+
+        for (uint8_t thread_idx = 0; thread_idx < NUM_THREADS; thread_idx++)
+        {
+            threads.emplace_back(std::thread(InsertSearchDeleteSearch, std::ref(bst), thread_idx));
+        }
+
+        std::cout << "Joining threads" << std::endl;
+
+        for (uint8_t thread_idx = 0; thread_idx < NUM_THREADS; thread_idx++)
+        {
+            threads.at(thread_idx).join();
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Execution time: " << duration.count() << std::endl;
+        std::cout << "PASSED" << std::endl;
+    }
+    return 0;
+}

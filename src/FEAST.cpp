@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <tuple>
+#include <thread>
 #include "FEAST.h"
 
 LockFreeBST::LockFreeBST()
@@ -23,6 +24,7 @@ LockFreeBST::~LockFreeBST()
 // check whether or not the tree contains a given key
 auto LockFreeBST::Search(uint32_t key) -> bool
 {
+    // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << " " << key << std::endl;
     SeekRecord seekRecord;
     Seek(key, seekRecord);
     if (seekRecord.terminal->key == key)
@@ -33,6 +35,7 @@ auto LockFreeBST::Search(uint32_t key) -> bool
 
 auto LockFreeBST::Insert(uint32_t key) -> bool
 {
+    // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << " " << key << std::endl;
     SeekRecord seekRecord;
     while (true)
     {
@@ -89,19 +92,25 @@ auto LockFreeBST::Insert(uint32_t key) -> bool
 
 auto LockFreeBST::Delete(uint32_t key) -> bool
 {
+    // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << " " << key << std::endl;
     SeekRecord seekRecord;
+    Node *terminal;
     DeleteMode mode = INJECTION; // start with INJECTION mode
     while (true)
     {
         Seek(key, seekRecord);
         auto parent = seekRecord.parent;
+
+        // obtain the address of the child field that needs to be modified
         auto addressOfChildField = GetAddressOfNextChildField(key, parent);
 
         if (mode == INJECTION)
         {
-            auto terminal = seekRecord.terminal;
+            // check if the key is present in the tree
+            terminal = seekRecord.terminal;
             if (terminal->key != key)
             {
+                // key not present in the tree
                 return false;
             }
 
@@ -122,6 +131,7 @@ auto LockFreeBST::Delete(uint32_t key) -> bool
                     std::tie(flagged, tagged, address) = Read(addressOfChildField);
                     if ((address == terminal) && (flagged || tagged))
                     {
+                        // address of the child has not changed and either the leaf node or its sibling has been flagged for deletion
                         Cleanup(seekRecord);
                     }
                 }
@@ -129,14 +139,15 @@ auto LockFreeBST::Delete(uint32_t key) -> bool
         }
         else
         {
-            auto terminal = seekRecord.terminal;
             // Cleanup mode: Check if the leaf node that was flagged in the INJECTION mode is still present in tree
             if (seekRecord.terminal != terminal)
             {
+                // leaf node no longer present in the tree
                 return true;
             }
             else
             {
+                // the leaf node is still present in the tree; remove it
                 auto done = Cleanup(seekRecord);
                 if (done)
                 {
@@ -154,6 +165,7 @@ auto LockFreeBST::Delete(uint32_t key) -> bool
 */
 void LockFreeBST::Seek(uint32_t key, SeekRecord &seekRecord)
 {
+    // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << " " << key << std::endl;
     auto ancestor = root;
     auto successor = ancestor->left;
     auto parent = ancestor->left;
@@ -200,6 +212,7 @@ void LockFreeBST::Seek(uint32_t key, SeekRecord &seekRecord)
 */
 auto LockFreeBST::Cleanup(SeekRecord &seekRecord) -> bool
 {
+    // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << std::endl;
     // retrieve all addresses stored in the seek record for easy access
     auto ancestor = seekRecord.ancestor;
     auto successor = seekRecord.successor;
@@ -336,4 +349,9 @@ auto LockFreeBST::Read(Node **nodeptr_addr) -> std::tuple<bool, bool, Node *>
     bool tagged = reinterpret_cast<uint64_t>(nodeptr) & TAG_BIT;
     auto address = reinterpret_cast<Node *>(reinterpret_cast<uint64_t>(nodeptr) & (~(FLAG_BIT | TAG_BIT)));
     return std::make_tuple(flagged, tagged, address);
+}
+
+void LockFreeBST::PrintTree()
+{
+    BinarySearchTree::PrintTree(root);
 }

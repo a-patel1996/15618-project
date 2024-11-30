@@ -6,7 +6,7 @@ OBJDIR = obj
 
 # Compiler & flags
 CXX = g++
-CXXFLAGS = -g -Wall -Werror -Wextra -O3 -std=c++20 -pthread -m64 -I$(INCDIR)
+CXXFLAGS = -g -Wall -Werror -Wextra -O3 -std=c++20 -m64 -I$(INCDIR)
 
 # Source files
 SRCS = $(wildcard $(SRCDIR)/*.cpp)

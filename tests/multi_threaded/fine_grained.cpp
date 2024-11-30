@@ -7,7 +7,7 @@
 
 #define NUM_KEYS 100000
 #define MAX_KEY_VALUE 10000
-#define NUM_THREADS 8
+#define NUM_THREADS 10
 
 void InsertSearchDeleteSearch(FineGrainedBST &bst, uint8_t thread_idx)
 {

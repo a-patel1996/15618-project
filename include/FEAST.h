@@ -34,6 +34,7 @@ private:
         CLEANUP = 1
     } DeleteMode;
 
+    void FreeNode(Node *node);
     void Seek(uint32_t key, SeekRecord &seekRecord);
     auto Cleanup(SeekRecord &seekRecord) -> bool;
 

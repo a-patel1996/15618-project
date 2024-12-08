@@ -22,6 +22,7 @@ void FineGrainedBST::FreeNode(NodeFG *node)
 
 auto FineGrainedBST::Search(uint32_t key) -> bool
 {
+    op_count++;
     op_lock.lock();
     if (root == nullptr) {
         op_lock.unlock();
@@ -55,6 +56,7 @@ auto FineGrainedBST::Search(uint32_t key) -> bool
 
 auto FineGrainedBST::Insert(uint32_t key) -> bool
 {
+    op_count++;
     op_lock.lock();
     if (root == nullptr) {
         root = new NodeFG(key);
@@ -99,6 +101,7 @@ auto FineGrainedBST::Insert(uint32_t key) -> bool
 
 auto FineGrainedBST::Delete(uint32_t key) -> bool
 {
+    op_count++;
     op_lock.lock();
     if (root == nullptr) {
         op_lock.unlock();

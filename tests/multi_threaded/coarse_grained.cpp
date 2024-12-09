@@ -7,10 +7,11 @@
 #include "coarse_grained_bst.h"
 
 #define NUM_OF_RUNS 5
-#define NUM_OF_OPS 1000000
-#define NUM_KEYS 1048576
-#define NUM_THREADS 16
+#define NUM_OF_OPS 5000000
+#define NUM_KEYS 256
+#define NUM_THREADS 1
 
+std::atomic<uint_fast64_t> op_count;
 volatile bool done;
 
 void InsertSearchDeleteSearch(CoarseGrainedBST &bst, uint8_t thread_idx)
@@ -47,9 +48,16 @@ void ReadDominated(CoarseGrainedBST &bst)
     thread_local std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> dis(0, NUM_KEYS - 1);
 
-    // while(!done)
-    for (auto i = 0; i < NUM_OF_OPS; i++)
+    while (true)
+    // while (!done)
+    // for (auto i = 0; i < NUM_OF_OPS; i++)
     {
+        uint_fast64_t curr = op_count;
+        if (curr == 0)
+            break;
+        if (op_count.compare_exchange_strong(curr, curr - 1) == false)
+            continue;
+
         auto key = dis(gen);
         double prob = (double)rand() / RAND_MAX;
         if (prob < 0.05)
@@ -67,9 +75,16 @@ void Balanced(CoarseGrainedBST &bst)
     thread_local std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> dis(0, NUM_KEYS - 1);
 
-    // while(!done)
-    for (auto i = 0; i < NUM_OF_OPS; i++)
+    while (true)
+    // while (!done)
+    // for (auto i = 0; i < NUM_OF_OPS; i++)
     {
+        uint_fast64_t curr = op_count;
+        if (curr == 0)
+            break;
+        if (op_count.compare_exchange_strong(curr, curr - 1) == false)
+            continue;
+
         auto key = dis(gen);
         int val = rand() % 3;
         if (val == 0)
@@ -87,9 +102,16 @@ void WriteDominated(CoarseGrainedBST &bst)
     thread_local std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> dis(0, NUM_KEYS - 1);
 
-    // while(!done)
-    for (auto i = 0; i < NUM_OF_OPS; i++)
+    while (true)
+    // while (!done)
+    // for (auto i = 0; i < NUM_OF_OPS; i++)
     {
+        uint_fast64_t curr = op_count;
+        if (curr == 0)
+            break;
+        if (op_count.compare_exchange_strong(curr, curr - 1) == false)
+            continue;
+
         auto key = dis(gen);
         double prob = (double)rand() / RAND_MAX;
         if (prob < 0.5)
@@ -149,6 +171,7 @@ int main()
         std::vector<std::thread> threads;
         CoarseGrainedBST bst;
         prePopulateTree(bst);
+        op_count = NUM_OF_OPS;
 
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -183,6 +206,7 @@ int main()
         std::vector<std::thread> threads;
         CoarseGrainedBST bst;
         prePopulateTree(bst);
+        op_count = NUM_OF_OPS;
 
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -217,6 +241,7 @@ int main()
         std::vector<std::thread> threads;
         CoarseGrainedBST bst;
         prePopulateTree(bst);
+        op_count = NUM_OF_OPS;
 
         auto start = std::chrono::high_resolution_clock::now();
 

@@ -30,7 +30,7 @@ void LockFreeBST::FreeNode(Node *node)
 // check whether or not the tree contains a given key
 auto LockFreeBST::Search(uint32_t key) -> bool
 {
-    op_count++;
+    // op_count++;
     // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << " " << key << std::endl;
     SeekRecord seekRecord;
     Seek(key, seekRecord);
@@ -42,7 +42,7 @@ auto LockFreeBST::Search(uint32_t key) -> bool
 
 auto LockFreeBST::Insert(uint32_t key) -> bool
 {
-    op_count++;
+    // op_count++;
     // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << " " << key << std::endl;
     SeekRecord seekRecord;
     while (true)
@@ -100,7 +100,7 @@ auto LockFreeBST::Insert(uint32_t key) -> bool
 
 auto LockFreeBST::Delete(uint32_t key) -> bool
 {
-    op_count++;
+    // op_count++;
     // std::cout << "[" << std::this_thread::get_id() << "] " << __func__ << " " << key << std::endl;
     SeekRecord seekRecord;
     Node *terminal;

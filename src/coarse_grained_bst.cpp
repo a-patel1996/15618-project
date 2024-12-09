@@ -22,7 +22,7 @@ void CoarseGrainedBST::FreeNode(Node *node)
 
 auto CoarseGrainedBST::Search(uint32_t key) -> bool
 {
-    op_count++;
+    // op_count++;
     std::scoped_lock lock(op_lock);
 
     if (root == nullptr)
@@ -45,7 +45,7 @@ auto CoarseGrainedBST::Search(uint32_t key) -> bool
 
 auto CoarseGrainedBST::Insert(uint32_t key) -> bool
 {
-    op_count++;
+    // op_count++;
     std::scoped_lock lock(op_lock);
 
     if (root == nullptr)
@@ -104,7 +104,7 @@ auto CoarseGrainedBST::Insert(uint32_t key) -> bool
 
 auto CoarseGrainedBST::Delete(uint32_t key) -> bool
 {
-    op_count++;
+    // op_count++;
     std::scoped_lock lock(op_lock);
 
     if (root == nullptr)

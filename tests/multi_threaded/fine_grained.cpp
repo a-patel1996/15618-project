@@ -48,15 +48,15 @@ void ReadDominated(FineGrainedBST &bst)
     thread_local std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> dis(0, NUM_KEYS - 1);
 
-    while (true)
-    // while (!done)
+    // while (true)
+    while (!done)
     // for (auto i = 0; i < NUM_OF_OPS; i++)
     {
-        uint_fast64_t curr = op_count;
-        if (curr == 0)
-            break;
-        if (op_count.compare_exchange_strong(curr, curr - 1) == false)
-            continue;
+        // uint_fast64_t curr = op_count;
+        // if (curr == 0)
+        //     break;
+        // if (op_count.compare_exchange_strong(curr, curr - 1) == false)
+        //     continue;
 
         auto key = dis(gen);
         double prob = (double)rand() / RAND_MAX;
@@ -75,15 +75,15 @@ void Balanced(FineGrainedBST &bst)
     thread_local std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> dis(0, NUM_KEYS - 1);
 
-    while (true)
-    // while (!done)
+    // while (true)
+    while (!done)
     // for (auto i = 0; i < NUM_OF_OPS; i++)
     {
-        uint_fast64_t curr = op_count;
-        if (curr == 0)
-            break;
-        if (op_count.compare_exchange_strong(curr, curr - 1) == false)
-            continue;
+        // uint_fast64_t curr = op_count;
+        // if (curr == 0)
+        //     break;
+        // if (op_count.compare_exchange_strong(curr, curr - 1) == false)
+        //     continue;
 
         auto key = dis(gen);
         int val = rand() % 3;
@@ -102,15 +102,15 @@ void WriteDominated(FineGrainedBST &bst)
     thread_local std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> dis(0, NUM_KEYS - 1);
 
-    while (true)
-    // while (!done)
+    // while (true)
+    while (!done)
     // for (auto i = 0; i < NUM_OF_OPS; i++)
     {
-        uint_fast64_t curr = op_count;
-        if (curr == 0)
-            break;
-        if (op_count.compare_exchange_strong(curr, curr - 1) == false)
-            continue;
+        // uint_fast64_t curr = op_count;
+        // if (curr == 0)
+        //     break;
+        // if (op_count.compare_exchange_strong(curr, curr - 1) == false)
+        //     continue;
 
         auto key = dis(gen);
         double prob = (double)rand() / RAND_MAX;
@@ -174,7 +174,6 @@ int main()
         op_count = NUM_OF_OPS;
 
         auto start = std::chrono::high_resolution_clock::now();
-
         for (uint8_t thread_idx = 0; thread_idx < NUM_THREADS; thread_idx++)
         {
             threads.emplace_back(std::thread(ReadDominated, std::ref(bst)));
@@ -209,7 +208,6 @@ int main()
         op_count = NUM_OF_OPS;
 
         auto start = std::chrono::high_resolution_clock::now();
-
         for (uint8_t thread_idx = 0; thread_idx < NUM_THREADS; thread_idx++)
         {
             threads.emplace_back(std::thread(Balanced, std::ref(bst)));
@@ -244,7 +242,6 @@ int main()
         op_count = NUM_OF_OPS;
 
         auto start = std::chrono::high_resolution_clock::now();
-
         for (uint8_t thread_idx = 0; thread_idx < NUM_THREADS; thread_idx++)
         {
             threads.emplace_back(std::thread(WriteDominated, std::ref(bst)));
@@ -265,6 +262,7 @@ int main()
         write_dur += duration;
         write_val += static_cast<float>(bst.GetOpCount())/10000000;
     }
+
     std::cout << "READ: Average Duration (ops/sec): " << read_dur.count()/NUM_OF_RUNS << std::endl;
     std::cout << "BALANCED: Average Duration (ops/sec): " << bal_dur.count()/NUM_OF_RUNS << std::endl;
     std::cout << "WRITE: Average System Duration (ops/sec): " << write_dur.count()/NUM_OF_RUNS << std::endl;
